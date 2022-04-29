@@ -1,0 +1,8 @@
+Estados
+>{A, B}
+*{D, E, C}
+{F} 
+Alfabeto
+0
+1
+Transiciones
