@@ -7,7 +7,7 @@ Ejemplo:
 
           console> python main.py "archivoentrada".txt
 
-*Notar que este archivo tiene una estructura fija, con la cual representaremos autómatas. Una sección con los estados, una sección con el alfabeto y otra con las transiciones. El estado inicial es aquel precedido por un símbolo ">", mientras que los estados finales son aquellos precedidos por un "$*$". Por otro lado las transiciones tienen el siguiente formato: qi simbolo -> qf , en donde qi es el estado en donde comienza la transición, símbolo es un elemento del alfabeto, y qf es el estado a dónde se llega por medio de la transición.*
+*Notar que este archivo tiene una estructura fija, con la cual representaremos autómatas. Una sección con los estados, una sección con el alfabeto y otra con las transiciones. El estado inicial es aquel precedido por un símbolo ">", mientras que los estados finales son aquellos precedidos por un "***". Por otro lado las transiciones tienen el siguiente formato: qi simbolo -> qf , en donde qi es el estado en donde comienza la transición, símbolo es un elemento del alfabeto, y qf es el estado a dónde se llega por medio de la transición.*
 
 ## *Salida:*
 
