@@ -1,7 +1,7 @@
 import os
 import re
 
-file_name = "dfa_input"
+file_name = input("Please enter the file name of the dfa you wish to minimize:\n")
 
 state = r'[\d\w]+'
 symbol = r'[\d\w]'
@@ -23,11 +23,18 @@ def regex_find_span(text, word):
 
 def cleanOutputStr(str):
     clean_str = ''
+    if str[:10] == 'frozenset(':
+        str = str[10:-1]
     for char in str:
         if char != "'":
             clean_str += char
     return clean_str
 
+def findSetListIndex(set_list, value):
+    value = str(value)[2:-2]
+    for set in set_list:
+        if value in set:
+            return set_list.index(set)
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -51,7 +58,7 @@ with open(os.path.join(__location__, file_name+".txt")) as file:
     transitions = {}
 
     file.seek(state_span[1]+1)  # begin reading from Estados\n onwards
-    row_counter, valid_row_counter = 0, 0
+    
 
     for row in file:
 
@@ -72,10 +79,10 @@ with open(os.path.join(__location__, file_name+".txt")) as file:
             original_dfa["n_states"].add(row[:-1])
             states.add(row[:-1])
 
-        row_counter += 1
+        
 
     file.seek(alphabet_span[1]+8)  # begin reading from Alfabeto\n onwards
-    row_counter, valid_row_counter = 0, 0
+    
 
     for row in file:
         if row == "Transiciones\n":
@@ -85,10 +92,10 @@ with open(os.path.join(__location__, file_name+".txt")) as file:
 
         alphabet.add(row[:-1])
 
-        row_counter += 1
+        
 
     file.seek(transition_span[1])  # begin reading from Alfabeto\n onwards
-    row_counter, valid_row_counter = 0, 0
+    
 
     for row in file:
         if row == r'^\s+\n$':  # if row is empty, continue to the next iteration
@@ -101,7 +108,7 @@ with open(os.path.join(__location__, file_name+".txt")) as file:
             transitions[frozenset([match.group(1), match.group(2)])] = set(
                 match.group(3))
 
-        row_counter += 1
+        
 
 
 # ==== MINIMIZATION ALGORITHM ====
@@ -161,14 +168,20 @@ for state in minimized_states2:
     else:
         minimized_dfa["n_states"].add(str(state)[2:-2])
 # write minimized transitions
-minimized_states = minimized_dfa.values()
 minimized_transitions = {}
-#for val1,val2 in transitions:
-    #for state in minimized_states:
-        #minimized_transitions[] = str(minimized_states.find_set(v))
+for set in minimized_states2:
+    for (state1, symbol) in transitions:
+        # if the set contains the state and the destination is not part of the set...
+        if ( set & {state1, symbol} ) and ( transitions[frozenset({state1, symbol})] not in set ) : 
+            # new_destination will be minimized set containing previous destination set
+            new_destination = minimized_states2[findSetListIndex(minimized_states2, transitions[frozenset({state1, symbol})])]
+            if state1 in alphabet: #because sets are not always ordered
+                symbol = state1
+            minimized_transitions[frozenset({frozenset(set), symbol})] = new_destination
+            continue
 
 # write to output
-with open(os.path.join(__location__, file_name+"2.txt"), mode='w') as out_file:
+with open(os.path.join(__location__, "dfa_output.txt"), mode='w') as out_file:
     out_file.write("Estados\n")
 
     out_file.write(">" + cleanOutputStr(str(minimized_dfa["s_state"])) + "\n")
@@ -180,26 +193,10 @@ with open(os.path.join(__location__, file_name+"2.txt"), mode='w') as out_file:
     for value in alphabet:
         out_file.write(str(value) + "\n")
     out_file.write("Transiciones\n")
-
-
-
-# prints for testing
-
-
-#print("states", states)
-
-#print("alphabet", alphabet)
-
-for key in transitions:
-    print(key, transitions[key])
-
-print(transitions[frozenset(['0', 'B'])])
-print(table)
-print(minimized_states2)
-print("original_dfa", original_dfa)
-print("minimized_dfa", minimized_dfa)
-print(minimized_states)
-print(minimized_states2)
-
-
-# TODO :remove output2.txt syntax declaration
+    for key1,key2 in minimized_transitions:
+        if key1 in alphabet:
+            
+            out_file.write(cleanOutputStr(str(key2)) + " " + str(key1))
+        else:
+            out_file.write(cleanOutputStr(str(key1)) + " " + str(key2))
+        out_file.write(" -> " + cleanOutputStr(str(minimized_transitions[frozenset({key1,key2})])) + "\n")
